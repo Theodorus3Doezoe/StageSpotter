@@ -1,0 +1,88 @@
+@model StageSpotter.Web.Models.CreateVacatureViewModel
+@{
+    ViewData["Title"] = "Nieuwe Vacature Toevoegen";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="SoortStageId" class="control-label">Soort Stage</label>
+                <select asp-for="SoortStageId" class="form-control" asp-items="Html.GetEnumSelectList<StageSpotter.Domain.Enums.SoortStage>()">
+                    <option selected="selected" value="">Kies een stage type</option>
+                </select>
+                <span asp-validation-for="SoortStageId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="OpleidingsniveauIds" class="control-label">Opleidingsniveau(s)</label>
+                <select asp-for="OpleidingsniveauIds" class="form-control" multiple asp-items="@Model.OpleidingsniveausList">
+                </select>
+                <span asp-validation-for="OpleidingsniveauIds" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="StudierichtingIds" class="control-label">Studierichting(en)</label>
+                <select asp-for="StudierichtingIds" class="form-control" multiple asp-items="@Model.StudierichtingenList">
+                </select>
+                <span asp-validation-for="StudierichtingIds" class="text-danger"></span>
+            </div>
+
+            
+            <div class="form-group mb-3">
+                <label asp-for="Titel" class="control-label"></label>
+                <input asp-for="Titel" class="form-control" />
+                <span asp-validation-for="Titel" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Bedrijfnaam" class="control-label">Bedrijfsnaam</label>
+                <input asp-for="Bedrijfnaam" class="form-control" />
+                <span asp-validation-for="Bedrijfnaam" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Beschrijving" class="control-label"></label>
+                <textarea asp-for="Beschrijving" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Beschrijving" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Locatie" class="control-label"></label>
+                <input asp-for="Locatie" class="form-control" />
+                <span asp-validation-for="Locatie" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Publiceer Vacature" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('select[name="OpleidingsniveauIds"]').select2({
+                placeholder: "Kies één of meer niveaus",
+                allowClear: true
+            });
+
+            $('select[name="StudierichtingIds"]').select2({
+                placeholder: "Kies één of meer richtingen",
+                allowClear: true
+            });
+        });
+    </script>
+}

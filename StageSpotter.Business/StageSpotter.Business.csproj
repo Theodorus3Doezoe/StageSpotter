@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StageSpotter.Data\StageSpotter.Data.csproj" />
+    <ProjectReference Include="..\StageSpotter.Domain\StageSpotter.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.GenAI" Version="0.9.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Prompts\cv_prompt.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,187 @@
+﻿@model StageSpotter.Web.Models.VacatureOverzichtViewModel
+@{
+    ViewData["Title"] = "Vacature Overzicht";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+
+        @* Zoek input *@
+        <div class="col-lg-4 col-md-5">
+            <form method="get" action="@Url.Action("Index", "Home")" class="mb-3">
+                <div class="input-group shadow-sm">
+                    <input type="text" 
+                           name="zoekterm" 
+                           value="@Model.Zoekterm" 
+                           class="form-control" 
+                           placeholder="Zoek op trefwoord, bedrijf, locatie...">
+                    <button class="btn btn-primary" type="submit">Zoek</button>
+                    @* Geef een reset knop weer als de zoekbalk is ingevuld *@
+                    @if (!string.IsNullOrEmpty(Model.Zoekterm))
+                    {
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">Reset</a>
+                    }
+                </div>
+            </form>
+
+            @* Geef de standaard resultaten of zoekresultaten weer *@
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">
+                    @if (!string.IsNullOrEmpty(Model.Zoekterm))
+                    {
+                        <span>Zoekresultaten voor "@Model.Zoekterm" (@Model.TotaalVacatures)</span>
+                    }
+                    else
+                    {
+                        <span>Resultaten (@Model.TotaalVacatures)</span>
+                    }
+                </h5>
+                <a href="#" class="btn btn-light btn-sm">Filters</a>
+            </div>
+
+            <div class="list-group" style="max-height: 80vh; overflow-y: auto;">
+                @* Maak voor elke vacature een card *@
+                @foreach (var vacature in Model.Vacatures)
+                {
+                    string activeClass = (Model.GeselecteerdeVacature != null && vacature.Id == Model.GeselecteerdeVacature.Id) ? "active" : "";
+                    
+                    <a href="@Url.Action("Index", "Home", new { id = vacature.Id, zoekterm = Model.Zoekterm, pagina = Model.HuidigePagina })" 
+                       class="list-group-item list-group-item-action @activeClass">
+                       <div class="d-flex w-100 justify-content-between">
+                           <h5 class="mb-1">@vacature.Titel</h5>
+                           <small class="text-muted">
+                               <i class="bi bi-bookmark"></i>
+                           </small>
+                       </div>
+                       <p class="mb-1">
+                           @vacature.BedrijfNaam &bull; @vacature.Locatie
+                           @if (!string.IsNullOrEmpty(vacature.Opleidingen))
+                           {
+                               <span> &bull; @vacature.Opleidingen</span>
+                           }
+                           @if (!string.IsNullOrEmpty(vacature.Studierichtingen))
+                           {
+                               <span> &bull; @vacature.Studierichtingen</span>
+                           }
+                       </p>
+                       <small class="text-muted">
+                           Gepubliceerd op @vacature.PublicatieDatum.ToString("d MMM yyyy")
+                       </small>
+                    </a>
+                }
+            </div>
+            
+            @* Navbar voor meerdere pagina's *@
+            @if (Model.TotaalPaginas > 1)
+            {
+                <nav aria-label="Paginatie" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        
+                        @if (Model.HuidigePagina > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?pagina=@(Model.HuidigePagina - 1)&zoekterm=@Model.Zoekterm">Vorige</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">Vorige</span>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= Model.TotaalPaginas; i++)
+                        {
+                            string pageActiveClass = (i == Model.HuidigePagina) ? "active" : "";
+                            <li class="page-item @pageActiveClass">
+                                <a class="page-link" href="?pagina=@i&zoekterm=@Model.Zoekterm">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.HuidigePagina < Model.TotaalPaginas)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?pagina=@(Model.HuidigePagina + 1)&zoekterm=@Model.Zoekterm">Volgende</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">Volgende</span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+
+        </div>
+
+        @* Details sectie *@
+        <div class="col-lg-8 col-md-7" id="vacature-details-kolom">
+            @if (Model.GeselecteerdeVacature != null)
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="card-title">@Model.GeselecteerdeVacature.Titel</h2>
+                        
+                        <div class="d-flex align-items-center text-muted mb-3 flex-wrap">
+                            <span>@Model.GeselecteerdeVacature.BedrijfNaam</span>
+                            <span class="mx-2">&bull;</span>
+                            <span>@Model.GeselecteerdeVacature.Locatie</span>
+                            <span class="mx-2">&bull;</span>
+                            <span>@Model.GeselecteerdeVacature.SoortStage</span>
+                            @if (!string.IsNullOrEmpty(Model.GeselecteerdeVacature.Opleidingen))
+                            {
+                                <span class="mx-2">&bull;</span>
+                                <span>@Model.GeselecteerdeVacature.Opleidingen</span>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.GeselecteerdeVacature.Studierichtingen))
+                            {
+                                <span class="mx-2">&bull;</span>
+                                <span>@Model.GeselecteerdeVacature.Studierichtingen</span>
+                            }
+                        </div>
+
+                        <hr>
+
+                        <h5>Over de rol</h5>
+                        <p>@Html.Raw(Model.GeselecteerdeVacature.Beschrijving?.Replace(Environment.NewLine, "<br />"))</p>
+
+                        @if (!string.IsNullOrEmpty(Model.GeselecteerdeVacature.VacatureUrl))
+                        {
+                            <a href="@Model.GeselecteerdeVacature.VacatureUrl" class="btn btn-primary btn-lg mt-3" target="_blank">
+                                Solliciteer nu
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="#" class="btn btn-secondary btn-lg mt-3 disabled" aria-disabled="true">
+                                Sollicitatie niet beschikbaar
+                            </a>
+                        }
+                        
+                            <div class="d-flex justify-content-end mt-3">
+                                <a href="#" class="btn btn-link">Deel</a>
+                                <form method="post" action="/Vacature/SaveToProfile" style="display:inline">
+                                   <input type="hidden" name="vacatureId" value="@Model.GeselecteerdeVacature.Id" />
+                                   <button type="submit" class="btn btn-success ms-2">Vacature opslaan</button>
+                                </form>
+                            </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    Er zijn momenteel geen actieve vacatures gevonden.
+                </div>
+            }
+        </div>
+        
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

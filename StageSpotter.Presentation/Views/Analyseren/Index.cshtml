@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Analyseren";
+}
+
+<div class="container mt-4">
+    <h2>CV Analyseren</h2>
+    <p>Upload hier je CV als Word-bestand (.doc of .docx) om te analyseren.</p>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success">
+            @ViewBag.Message
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <form asp-controller="Analyseren" asp-action="Upload" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="file" class="form-label">Kies een bestand</label>
+                    <input type="file" name="Bestand" id="file" class="form-control" accept=".doc,.docx" required />                </div>
+                <button type="submit" class="btn btn-primary">Analyseren</button>
+            </form>
+        </div>
+    </div>
+</div>
