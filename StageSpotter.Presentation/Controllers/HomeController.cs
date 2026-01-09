@@ -7,28 +7,79 @@ namespace StageSpotter.Web.Controllers
     public class HomeController : Controller
     {
         private readonly IVacatureService _vacatureService;
+        private readonly StageSpotter.Business.Interfaces.IReviewService _reviewService;
         private const int VACATURES_PER_PAGINA = 5;
 
-        public HomeController(IVacatureService vacatureService)
+        public HomeController(IVacatureService vacatureService, StageSpotter.Business.Interfaces.IReviewService reviewService)
         {
             _vacatureService = vacatureService;
+            _reviewService = reviewService;
         }
         public IActionResult Index(string? zoekterm, int pagina = 1, int? id = null)
         {
             var alleVacatures = _vacatureService.GetAlleVacatures();
             
-            // Filter vacatures
+            // Filter vacatures op basis van zoekterm
             var gefilterdeVacatures = alleVacatures;
             if (!string.IsNullOrEmpty(zoekterm))
             {
-                gefilterdeVacatures = alleVacatures.Where(v => 
-                    v.Titel.Contains(zoekterm, StringComparison.OrdinalIgnoreCase) ||
-                    v.Beschrijving.Contains(zoekterm, StringComparison.OrdinalIgnoreCase) ||
-                    v.Bedrijf.Naam.Contains(zoekterm, StringComparison.OrdinalIgnoreCase) ||
-                    v.Locatie.Contains(zoekterm, StringComparison.OrdinalIgnoreCase) ||
-                    v.Opleidingsniveaus.Any(o => o.Niveau.Contains(zoekterm, StringComparison.OrdinalIgnoreCase)) ||
-                    v.Studierichtingen.Any(s => s.Richting.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
-                ).ToList();
+                List<Vacature> resultaat = new List<Vacature>();
+                
+                foreach (var vacature in alleVacatures)
+                {
+                    bool matchGevonden = false;
+                    
+                    // Check of zoekterm voorkomt in titel
+                    if (vacature.Titel.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchGevonden = true;
+                    }
+                    
+                    // Check of zoekterm voorkomt in beschrijving
+                    if (vacature.Beschrijving.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchGevonden = true;
+                    }
+                    
+                    // Check of zoekterm voorkomt in bedrijfsnaam
+                    if (vacature.Bedrijf.Naam.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchGevonden = true;
+                    }
+                    
+                    // Check of zoekterm voorkomt in locatie
+                    if (vacature.Locatie.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchGevonden = true;
+                    }
+                    
+                    // Check of zoekterm voorkomt in opleidingsniveaus
+                    foreach (var niveau in vacature.Opleidingsniveaus)
+                    {
+                        if (niveau.Niveau.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
+                        {
+                            matchGevonden = true;
+                            break;
+                        }
+                    }
+                    
+                    // Check of zoekterm voorkomt in studierichtingen
+                    foreach (var richting in vacature.Studierichtingen)
+                    {
+                        if (richting.Richting.Contains(zoekterm, StringComparison.OrdinalIgnoreCase))
+                        {
+                            matchGevonden = true;
+                            break;
+                        }
+                    }
+                    
+                    if (matchGevonden)
+                    {
+                        resultaat.Add(vacature);
+                    }
+                }
+                
+                gefilterdeVacatures = resultaat;
             }
 
             // Bereken paginering
@@ -38,10 +89,14 @@ namespace StageSpotter.Web.Controllers
             if (pagina < 1) pagina = 1;
             if (pagina > totaalAantalPaginas) pagina = totaalAantalPaginas;
 
-            var vacatureEntitiesVoorPagina = gefilterdeVacatures
-                .Skip((pagina - 1) * VACATURES_PER_PAGINA) // Bereken hoeveel vacatures je moet overslaan voor de juiste pagina
-                .Take(VACATURES_PER_PAGINA) // Selecteer de volgende 5 pagina's
-                .ToList();
+            // Bereken welke vacatures op deze pagina moeten komen
+            int aantalTeOverslaan = (pagina - 1) * VACATURES_PER_PAGINA;
+            List<Vacature> vacatureEntitiesVoorPagina = new List<Vacature>();
+            
+            for (int i = aantalTeOverslaan; i < gefilterdeVacatures.Count && i < aantalTeOverslaan + VACATURES_PER_PAGINA; i++)
+            {
+                vacatureEntitiesVoorPagina.Add(gefilterdeVacatures[i]);
+            }
 
             var viewModel = new VacatureOverzichtViewModel
             {
@@ -50,45 +105,122 @@ namespace StageSpotter.Web.Controllers
                 TotaalPaginas = totaalAantalPaginas,
                 TotaalVacatures = totaalAantalVacatures,
                 
-                // Map elke vacature(v) om in een new VacatureLijstItem
-                Vacatures = vacatureEntitiesVoorPagina.Select(v => new VacatureLijstItem
-                {
-                    Id = v.Id,
-                    Titel = v.Titel,
-                    BedrijfNaam = v.Bedrijf?.Naam ?? "Onbekend", // Null-check!
-                    Locatie = v.Locatie,
-                    PublicatieDatum = v.PublicatieDatum,
-                    Opleidingen = string.Join(" - ", v.Opleidingsniveaus.Select(o => o.Niveau)),
-                    Studierichtingen = string.Join(" - ", v.Studierichtingen.Select(s => s.Richting))
-                }).ToList()
+                Vacatures = new List<VacatureLijstItem>()
             };
-
-            // Logica voor gesecteerde vacature
-            Vacature? geselecteerdeEntity = null;
             
-            if (id.HasValue) // Check voor een id in de url
-            {   // Zoek in de lijst naar de vacature met het id in de url
-                geselecteerdeEntity = gefilterdeVacatures.FirstOrDefault(v => v.Id == id.Value);
+            // Zet elke vacature om naar een VacatureLijstItem voor de view
+            foreach (var vacature in vacatureEntitiesVoorPagina)
+            {
+                var item = new VacatureLijstItem();
+                item.Id = vacature.Id;
+                item.Titel = vacature.Titel;
+                
+                // Check of bedrijf bestaat
+                if (vacature.Bedrijf != null)
+                {
+                    item.BedrijfNaam = vacature.Bedrijf.Naam;
+                    item.BedrijfId = vacature.Bedrijf.Id;
+                }
+                else
+                {
+                    item.BedrijfNaam = "Onbekend";
+                    item.BedrijfId = vacature.BedrijfId;
+                }
+                
+                item.Locatie = vacature.Locatie;
+                item.PublicatieDatum = vacature.PublicatieDatum;
+                
+                // Maak een string van alle opleidingsniveaus
+                List<string> niveaus = new List<string>();
+                foreach (var niveau in vacature.Opleidingsniveaus)
+                {
+                    niveaus.Add(niveau.Niveau);
+                }
+                item.Opleidingen = string.Join(" - ", niveaus);
+                
+                // Maak een string van alle studierichtingen
+                List<string> richtingen = new List<string>();
+                foreach (var richting in vacature.Studierichtingen)
+                {
+                    richtingen.Add(richting.Richting);
+                }
+                item.Studierichtingen = string.Join(" - ", richtingen);
+                
+                // Bereken gemiddelde rating en rond af op 2 decimalen
+                double rating = _reviewService.GetAverageRating(vacature.Id);
+                item.AverageRating = Math.Round(rating, 2);
+                
+                viewModel.Vacatures.Add(item);
+            }
+            
+            viewModel.TotaalPaginas = totaalAantalPaginas;
+viewModel.TotaalVacatures = totaalAantalVacatures;           
+
+            // Zoek de geselecteerde vacature
+            Vacature geselecteerdeEntity = null;
+            
+            if (id.HasValue)
+            {
+                // Er is een id meegegeven in de URL, zoek deze vacature
+                foreach (var vacature in gefilterdeVacatures)
+                {
+                    if (vacature.Id == id.Value)
+                    {
+                        geselecteerdeEntity = vacature;
+                        break;
+                    }
+                }
             }
             else
-            {   // Anders selecteer de eerste vacature
-                geselecteerdeEntity = vacatureEntitiesVoorPagina.FirstOrDefault();
+            {
+                // Geen id meegegeven, kies de eerste vacature van deze pagina
+                if (vacatureEntitiesVoorPagina.Count > 0)
+                {
+                    geselecteerdeEntity = vacatureEntitiesVoorPagina[0];
+                }
             }
 
+            // Zet geselecteerde vacature om naar detail model voor de view
             if (geselecteerdeEntity != null)
             {
-                viewModel.GeselecteerdeVacature = new VacatureDetailItem
+                var detailItem = new VacatureDetailItem();
+                detailItem.Id = geselecteerdeEntity.Id;
+                detailItem.Titel = geselecteerdeEntity.Titel;
+                
+                // Check of bedrijf bestaat
+                if (geselecteerdeEntity.Bedrijf != null)
                 {
-                    Id = geselecteerdeEntity.Id,
-                    Titel = geselecteerdeEntity.Titel,
-                    BedrijfNaam = geselecteerdeEntity.Bedrijf?.Naam ?? "Onbekend",
-                    Locatie = geselecteerdeEntity.Locatie,
-                    SoortStage = geselecteerdeEntity.SoortStage.ToString(),
-                    Beschrijving = geselecteerdeEntity.Beschrijving,
-                    Opleidingen = string.Join(" - ", geselecteerdeEntity.Opleidingsniveaus.Select(o => o.Niveau)),
-                    Studierichtingen = string.Join(" - ", geselecteerdeEntity.Studierichtingen.Select(s => s.Richting)),
-                    VacatureUrl = geselecteerdeEntity.VacatureUrl
-                };
+                    detailItem.BedrijfNaam = geselecteerdeEntity.Bedrijf.Naam;
+                    detailItem.BedrijfId = geselecteerdeEntity.Bedrijf.Id;
+                }
+                else
+                {
+                    detailItem.BedrijfNaam = "Onbekend";
+                    detailItem.BedrijfId = geselecteerdeEntity.BedrijfId;
+                }
+                
+                detailItem.Locatie = geselecteerdeEntity.Locatie;
+                detailItem.SoortStage = geselecteerdeEntity.SoortStage.ToString();
+                detailItem.Beschrijving = geselecteerdeEntity.Beschrijving;
+                detailItem.VacatureUrl = geselecteerdeEntity.VacatureUrl;
+                
+                // Maak string van opleidingsniveaus
+                List<string> niveauLijst = new List<string>();
+                foreach (var niveau in geselecteerdeEntity.Opleidingsniveaus)
+                {
+                    niveauLijst.Add(niveau.Niveau);
+                }
+                detailItem.Opleidingen = string.Join(" - ", niveauLijst);
+                
+                // Maak string van studierichtingen
+                List<string> richtingLijst = new List<string>();
+                foreach (var richting in geselecteerdeEntity.Studierichtingen)
+                {
+                    richtingLijst.Add(richting.Richting);
+                }
+                detailItem.Studierichtingen = string.Join(" - ", richtingLijst);
+                
+                viewModel.GeselecteerdeVacature = detailItem;
             }
             
             return View(viewModel);

@@ -1,0 +1,53 @@
+@model List<StageSpotter.Domain.Models.VacatureScoreItem>
+
+@{
+    ViewData["Title"] = "Aanbevelingen";
+}
+
+<div class="container mt-4">
+    <h2>Aanbevelingen</h2>
+    <p>Vacatures gesorteerd op matchscore op basis van jouw CV analyse(s) en voorkeuren.</p>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">Geen aanbevelingen beschikbaar</h5>
+            <p>Er zijn op dit moment geen vacatures die aansluiten bij jouw profiel.</p>
+            <hr>
+            <p class="mb-0">
+                <small>
+                    Tip: Vul je CV analyse in en stel je voorkeuren in om gepersonaliseerde aanbevelingen te ontvangen.
+                    <a asp-controller="Analyseren" asp-action="Index" class="alert-link">Ga naar CV Analyse</a>
+                </small>
+            </p>
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Plaats</th>
+                    <th>Titel</th>
+                    <th>Bedrijf</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index = 0;
+                }
+                @foreach (var item in Model)
+                {
+                    index++;
+                    <tr>
+                        <td><span class="badge bg-primary">@index</span></td>
+                        <td>@item.Titel</td>
+                        <td>@item.BedrijfNaam</td>
+                        <td><a class="btn btn-sm btn-outline-primary" asp-controller="Vacature" asp-action="Details" asp-route-id="@item.VacatureId">Bekijk</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

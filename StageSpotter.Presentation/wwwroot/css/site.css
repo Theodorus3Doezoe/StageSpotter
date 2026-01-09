@@ -24,6 +24,15 @@ body {
   color: #0f172a;
 }
 
+/* Ensure readable links inside active list-group items */
+.list-group-item.active a {
+  color: #fff !important;
+  text-decoration-color: rgba(255,255,255,0.6);
+}
+.list-group-item.active a:hover {
+  color: #f1f5f9 !important; /* light slate */
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

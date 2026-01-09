@@ -6,5 +6,7 @@ namespace StageSpotter.Data.Interfaces
     {
         BedrijfDto? FindByName(string bedrijfsnaam);
         BedrijfDto Create(BedrijfDto bedrijfDto);
+        System.Collections.Generic.List<BedrijfDto> GetAll();
+        BedrijfDto? GetById(int id);
     }
 }

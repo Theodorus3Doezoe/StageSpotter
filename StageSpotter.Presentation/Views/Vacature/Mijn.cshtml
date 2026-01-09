@@ -1,0 +1,33 @@
+@model List<StageSpotter.Web.Models.VacatureLijstItem>
+@{
+    ViewData["Title"] = "Mijn Vacatures";
+}
+<div class="container mt-4">
+    <h3 class="mb-3">Mijn Vacatures</h3>
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">Nog geen vacatures geplaatst.</div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var v in Model)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@v.Titel</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@v.BedrijfNaam</h6>
+                            <div class="mb-2 text-muted">@v.Locatie</div>
+                            <a class="btn btn-primary" asp-controller="Vacature" asp-action="Details" asp-route-id="@v.Id">Bekijken</a>
+                            <a class="btn btn-outline-secondary ms-2" asp-controller="Vacature" asp-action="Edit" asp-route-id="@v.Id">Bewerken</a>
+                            <form asp-controller="Vacature" asp-action="Delete" asp-route-id="@v.Id" method="post" class="d-inline ms-2" onsubmit="return confirm('Weet je zeker dat je deze vacature wilt verwijderen?');">
+                                <button type="submit" class="btn btn-outline-danger">Verwijderen</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

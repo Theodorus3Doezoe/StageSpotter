@@ -1,0 +1,48 @@
+@model StageSpotter.Domain.Models.UserPreference
+
+@{
+    ViewData["Title"] = "Persoonlijkheidsquiz";
+}
+
+<div class="container mt-4">
+    <h2>Persoonlijkheidsquiz</h2>
+    <form method="post" action="/Quiz/Save">
+        <div class="mb-3">
+            <label class="form-label">Werkstijl</label>
+            @{ var ws = Model?.Werkstijl ?? string.Empty; }
+            <select name="Werkstijl" class="form-select">
+                <option value="">Kies...</option>
+                @if (ws == "Zelfstandig") { <option value="Zelfstandig" selected>Zelfstandig</option> } else { <option value="Zelfstandig">Zelfstandig</option> }
+                @if (ws == "Begeleiding") { <option value="Begeleiding" selected>Begeleiding</option> } else { <option value="Begeleiding">Begeleiding</option> }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Bedrijfstype</label>
+            @{ var bt = Model?.Bedrijfstype ?? string.Empty; }
+            <select name="Bedrijfstype" class="form-select">
+                <option value="">Kies...</option>
+                @if (bt == "Startup") { <option value="Startup" selected>Startup</option> } else { <option value="Startup">Startup</option> }
+                @if (bt == "Corporate") { <option value="Corporate" selected>Corporate</option> } else { <option value="Corporate">Corporate</option> }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Focus</label>
+            @{ var f = Model?.Focus ?? string.Empty; }
+            <select name="Focus" class="form-select">
+                <option value="">Kies...</option>
+                @if (f == "Backend") { <option value="Backend" selected>Backend</option> } else { <option value="Backend">Backend</option> }
+                @if (f == "Frontend") { <option value="Frontend" selected>Frontend</option> } else { <option value="Frontend">Frontend</option> }
+                @if (f == "Analyse") { <option value="Analyse" selected>Analyse</option> } else { <option value="Analyse">Analyse</option> }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Leerdoel</label>
+            <input type="text" name="Leerdoel" class="form-control" value="@Model?.Leerdoel" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Opslaan</button>
+    </form>
+</div>

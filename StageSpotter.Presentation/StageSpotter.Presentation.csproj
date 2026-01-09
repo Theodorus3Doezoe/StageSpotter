@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\StageSpotter.Business\StageSpotter.Business.csproj" />
       <ProjectReference Include="..\StageSpotter.Domain\StageSpotter.Domain.csproj" />
+      <ProjectReference Include="..\StageSpotter.Data\StageSpotter.Data.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -17,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="DotNetEnv" Version="3.1.1" />
       <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     </ItemGroup>

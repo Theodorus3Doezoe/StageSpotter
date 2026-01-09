@@ -69,6 +69,12 @@ namespace StageSpotter.Business.Services
             return dtos.Select(VacatureMapper.ToDomain).ToList();
         }
 
+        public Vacature? GetVacatureById(int id)
+        {
+            var dto = vacatureRepository.GetById(id);
+            return dto == null ? null : VacatureMapper.ToDomain(dto);
+        }
+
         public List<Opleidingsniveau> GetAlleOpleidingsniveaus()
         {
             var dtos = opleidingsniveauRepository.GetAlleOpleidingsniveaus();
@@ -79,6 +85,18 @@ namespace StageSpotter.Business.Services
         {
             var dtos = studierichtingRepository.GetAlleStudierichtingen();
             return dtos.Select(VacatureMapper.ToDomain).ToList();
+        }
+
+        public bool UpdateVacature(Vacature vacature, int bedrijfId)
+        {
+            var dto = VacatureMapper.ToRepositoryDto(vacature);
+            dto.Id = vacature.Id;
+            return vacatureRepository.Update(dto, bedrijfId);
+        }
+
+        public bool DeactivateVacature(int id, int bedrijfId)
+        {
+            return vacatureRepository.Deactivate(id, bedrijfId);
         }
     }
 }

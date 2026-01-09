@@ -57,6 +57,12 @@
                 <span asp-validation-for="Locatie" class="text-danger"></span>
             </div>
 
+            <div class="form-group mb-3">
+                <label asp-for="VacatureUrl" class="control-label">Link naar originele vacature</label>
+                <input asp-for="VacatureUrl" class="form-control" placeholder="https://www.example.com/vacature" />
+                <span asp-validation-for="VacatureUrl" class="text-danger"></span>
+            </div>
+
             <div class="form-group">
                 <input type="submit" value="Publiceer Vacature" class="btn btn-primary" />
             </div>

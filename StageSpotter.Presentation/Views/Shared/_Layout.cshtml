@@ -21,13 +21,49 @@
                 <li class="nav-item">
                     <a class="nav-link" asp-controller="Analyseren" asp-action="Index">Analyseren</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Match" asp-action="Index">Aanbevelingen</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Bedrijf" asp-action="Index">Bedrijven</a>
+                </li>
             </ul>
             
-            <!-- Rechts uitgelijnde knop -->
-            <div class="d-flex">
-                <a href="/Vacature/Create" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Nieuwe Vacature
-                </a>
+            <!-- Rechts uitgelijnde knop en profiel -->
+            <div class="d-flex align-items-center gap-2">
+                    @if (User?.Identity?.IsAuthenticated == true && User.FindFirst("usertype")?.Value == "bedrijf")
+                {
+                    <a href="/Vacature/Create" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Nieuwe Vacature
+                    </a>
+                }
+
+                <div class="dropdown">
+                    <a class="btn btn-light dropdown-toggle d-flex align-items-center" href="#" role="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
+                            @if (User?.Identity?.IsAuthenticated == true)
+                            {
+                                <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index">Profiel</a></li>
+                                @if (User.FindFirst("usertype")?.Value == "bedrijf")
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Vacature" asp-action="Mijn">Mijn Vacatures</a></li>
+                                }
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form method="post" asp-controller="Auth" asp-action="Logout" style="margin:0">
+                                        <button class="dropdown-item" type="submit">Uitloggen</button>
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li><a class="dropdown-item" asp-controller="Auth" asp-action="Login">Inloggen</a></li>
+                                <li><a class="dropdown-item" asp-controller="Auth" asp-action="Register">Registreren</a></li>
+                            }
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>

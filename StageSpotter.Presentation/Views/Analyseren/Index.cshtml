@@ -30,4 +30,29 @@
             </form>
         </div>
     </div>
+            
+            <div class="mt-3">
+                <h5>Recente analyses</h5>
+                @if (ViewData["SavedAnalyses"] is System.Collections.IEnumerable analyses)
+                {
+                    <ul class="list-group">
+                        @foreach (var a in analyses)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>@(a.GetType().GetProperty("FileName").GetValue(a))</strong>
+                                    <div class="text-muted small">@(a.GetType().GetProperty("CreatedAt").GetValue(a))</div>
+                                </div>
+                                <div>
+                                    <a class="btn btn-sm btn-outline-primary" href="/Analyseren/LoadSaved/@(a.GetType().GetProperty("Id").GetValue(a))">Bekijk</a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Geen recente analyses.</p>
+                }
+            </div>
 </div>

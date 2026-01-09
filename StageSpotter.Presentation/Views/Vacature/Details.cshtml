@@ -1,0 +1,115 @@
+@model StageSpotter.Web.Models.VacatureDetailItem
+@{
+    ViewData["Title"] = Model?.Titel ?? "Vacature";
+}
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">@Model.Titel</h3>
+        <h5 class="card-subtitle text-muted">
+            <a asp-controller="Bedrijf" asp-action="Details" asp-route-id="@Model.BedrijfId">@Model.BedrijfNaam</a>
+        </h5>
+        <p class="mt-2"><strong>Locatie:</strong> @Model.Locatie</p>
+        <p><strong>Soort:</strong> @Model.SoortStage</p>
+        <p class="mt-3">@Model.Beschrijving</p>
+        @if (!string.IsNullOrEmpty(Model.VacatureUrl))
+        {
+            <a href="@(Model.VacatureUrl.StartsWith("http") ? Model.VacatureUrl : "https://" + Model.VacatureUrl)" class="btn btn-primary" target="_blank">Ga naar vacature</a>
+        }
+        <button class="btn btn-success ms-2" id="generateLetterBtn" data-vacature-id="@Model.Id">Genereer motivatiebrief</button>
+        <a href="/Profile" class="btn btn-link">Terug naar profiel</a>
+    </div>
+</div>
+
+<!-- Modal voor gegenereerde brief -->
+<div class="modal fade" id="letterModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Uw motivatiebrief</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="letterContent" style="white-space: pre-wrap; font-family: Arial, sans-serif;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                <button type="button" class="btn btn-primary" id="copyLetterBtn">Kopiëren</button>
+                <button type="button" class="btn btn-success" id="saveLetterBtn">Opslaan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentLetterContent = '';
+        let currentVacatureId = 0;
+
+        document.getElementById('generateLetterBtn').addEventListener('click', async function() {
+            const vacatureId = this.getAttribute('data-vacature-id');
+            currentVacatureId = vacatureId;
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Genereren...';
+
+            try {
+                const response = await fetch(`/Vacature/GenerateMotivationLetter?vacatureId=${vacatureId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentLetterContent = data.letter;
+                    document.getElementById('letterContent').textContent = data.letter;
+                    const modal = new bootstrap.Modal(document.getElementById('letterModal'));
+                    modal.show();
+                } else {
+                    alert('Fout: ' + data.message);
+                }
+            } catch (error) {
+                alert('Fout bij genereren: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Genereer motivatiebrief';
+            }
+        });
+
+        document.getElementById('copyLetterBtn').addEventListener('click', function() {
+            navigator.clipboard.writeText(currentLetterContent).then(() => {
+                alert('Brief gekopieerd naar klembord!');
+            });
+        });
+
+        document.getElementById('saveLetterBtn').addEventListener('click', async function() {
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Opslaan...';
+
+            try {
+                const response = await fetch('/Vacature/SaveMotivationLetter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        vacatureId: currentVacatureId,
+                        content: currentLetterContent,
+                        vacatureTitel: '@Model.Titel',
+                        bedrijfNaam: '@Model.BedrijfNaam'
+                    })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert('Fout: ' + data.message);
+                }
+            } catch (error) {
+                alert('Fout bij opslaan: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Opslaan';
+            }
+        });
+    </script>
+}

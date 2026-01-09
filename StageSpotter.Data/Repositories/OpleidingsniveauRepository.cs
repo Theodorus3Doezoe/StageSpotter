@@ -11,7 +11,7 @@ public class OpleidingsniveauRepository : IOpleidingsniveauRepository
 
     public OpleidingsniveauRepository(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection") 
+        _connectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
     // Maak de koppeling tussen vacature en opleidingsniveau 

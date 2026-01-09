@@ -5,9 +5,11 @@ namespace StageSpotter.Web.Models
         public int Id { get; set; }
         public string Titel { get; set; }
         public string BedrijfNaam { get; set; }
+        public int BedrijfId { get; set; }
         public string Locatie { get; set; }
         public string Opleidingen { get; set; } 
         public string Studierichtingen { get; set; } 
         public DateTime PublicatieDatum { get; set; }
+            public double AverageRating { get; set; }
     }
 }

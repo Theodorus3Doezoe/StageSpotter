@@ -1,0 +1,167 @@
+@{
+    ViewData["Title"] = "Profiel";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title mb-3">Mijn Profiel</h3>
+                    <dl class="row">
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@ViewData["Email"]</dd>
+                    </dl>
+                    <form method="post" asp-controller="Auth" asp-action="Logout">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-secondary" type="submit">Uitloggen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>Opgeslagen Analyses</h5>
+                    @if (ViewData["SavedAnalyses"] is System.Collections.IEnumerable analyses)
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var a in analyses)
+                            {
+                                var id = a.GetType().GetProperty("Id").GetValue(a);
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@(a.GetType().GetProperty("FileName").GetValue(a))</strong>
+                                        <div class="text-muted">@(a.GetType().GetProperty("CreatedAt").GetValue(a))</div>
+                                    </div>
+                                    <div>
+                                        <a class="btn btn-sm btn-primary me-2" href="/Profile/ViewAnalysis/@id">Bekijk</a>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Geen opgeslagen analyses.</p>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <h5>Opgeslagen Vacatures</h5>
+                </div>
+                @if (ViewData["SavedVacatureItems"] is System.Collections.IEnumerable svs)
+                {
+                    @foreach (var item in svs)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">@item.GetType().GetProperty("Titel").GetValue(item)</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">@item.GetType().GetProperty("BedrijfNaam").GetValue(item)</h6>
+                                    <p class="mb-1">@item.GetType().GetProperty("Locatie").GetValue(item)</p>
+                                    <p class="mb-1"><strong>Soort:</strong> @item.GetType().GetProperty("SoortStage").GetValue(item)</p>
+                                    <div class="text-muted small">Opgeslagen: @item.GetType().GetProperty("CreatedAt").GetValue(item)</div>
+                                    <div class="mt-2">
+                                        <a href="/Vacature/Details/@item.GetType().GetProperty("VacatureId").GetValue(item)" class="btn btn-sm btn-primary me-2">Bekijk</a>
+                                        <form method="post" action="/Profile/UnsaveVacature" class="d-inline">
+                                            <input type="hidden" name="vacatureId" value="@item.GetType().GetProperty("VacatureId").GetValue(item)" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Verwijder</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <p class="text-muted">Geen opgeslagen vacatures.</p>
+                    </div>
+                }
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5>Opgeslagen Motivatiebrieven</h5>
+                    @if (ViewData["SavedMotivationLetters"] is System.Collections.IEnumerable letters)
+                    {
+                        <div class="row">
+                            @foreach (var letter in letters)
+                            {
+                                var id = letter.GetType().GetProperty("Id").GetValue(letter);
+                                var vacatureTitel = letter.GetType().GetProperty("VacatureTitel").GetValue(letter);
+                                var bedrijfNaam = letter.GetType().GetProperty("BedrijfNaam").GetValue(letter);
+                                var createdAt = letter.GetType().GetProperty("CreatedAt").GetValue(letter);
+                                var content = letter.GetType().GetProperty("Content").GetValue(letter);
+                                <div class="col-md-6 mb-3">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@vacatureTitel</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">@bedrijfNaam</h6>
+                                            <div class="text-muted small">Opgeslagen: @createdAt</div>
+                                            <div class="mt-2">
+                                                <button class="btn btn-sm btn-primary me-2" onclick="viewLetter(@id, '@System.Web.HttpUtility.JavaScriptStringEncode(content?.ToString() ?? "")')">Bekijk</button>
+                                                <form method="post" action="/Profile/DeleteMotivationLetter" class="d-inline">
+                                                    <input type="hidden" name="id" value="@id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Zeker verwijderen?')">Verwijder</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Geen opgeslagen motivatiebrieven.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal voor brief viewing -->
+<div class="modal fade" id="letterViewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Motivatiebrief</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="letterViewContent" style="white-space: pre-wrap; font-family: Arial, sans-serif;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                <button type="button" class="btn btn-primary" onclick="copyLetter()">Kopiëren</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentViewLetter = '';
+
+        function viewLetter(id, content) {
+            currentViewLetter = content;
+            document.getElementById('letterViewContent').textContent = content;
+            const modal = new bootstrap.Modal(document.getElementById('letterViewModal'));
+            modal.show();
+        }
+
+        function copyLetter() {
+            navigator.clipboard.writeText(currentViewLetter).then(() => {
+                alert('Brief gekopieerd naar klembord!');
+            });
+        }
+    </script>
+}

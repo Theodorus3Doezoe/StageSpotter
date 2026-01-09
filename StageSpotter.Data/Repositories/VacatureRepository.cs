@@ -14,7 +14,7 @@ public class VacatureRepository : IVacatureRepository
 
     public VacatureRepository(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection")
+        _connectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
     public VacatureDto? GetById(int id)
@@ -279,6 +279,53 @@ public class VacatureRepository : IVacatureRepository
         catch (Exception ex)
         {
             throw new System.Data.DataException("Kon studierichtingen voor vacature niet ophalen.", ex);
+        }
+    }
+
+    public bool Deactivate(int id, int bedrijfId)
+    {
+        try
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                string sqlQuery = "UPDATE Vacatures SET IsActief = 0 WHERE Id = @Id AND BedrijfId = @BedrijfId";
+                SqliteCommand command = new SqliteCommand(sqlQuery, connection);
+                command.Parameters.AddWithValue("@Id", id);
+                command.Parameters.AddWithValue("@BedrijfId", bedrijfId);
+                connection.Open();
+                var rows = command.ExecuteNonQuery();
+                return rows > 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new DataException("Kon vacature niet deactiveren.", ex);
+        }
+    }
+
+    public bool Update(VacatureToRepositoryDto dto, int bedrijfId)
+    {
+        try
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                string sqlQuery = @"UPDATE Vacatures SET Titel=@Titel, Beschrijving=@Beschrijving, Locatie=@Locatie, SoortStage=@SoortStage, VacatureUrl=@VacatureUrl WHERE Id=@Id AND BedrijfId=@BedrijfId";
+                SqliteCommand command = new SqliteCommand(sqlQuery, connection);
+                command.Parameters.AddWithValue("@Titel", dto.Titel);
+                command.Parameters.AddWithValue("@Beschrijving", dto.Beschrijving);
+                command.Parameters.AddWithValue("@Locatie", dto.Locatie);
+                command.Parameters.AddWithValue("@SoortStage", dto.SoortStageId);
+                command.Parameters.AddWithValue("@VacatureUrl", (object?)dto.VacatureUrl ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Id", dto.Id);
+                command.Parameters.AddWithValue("@BedrijfId", bedrijfId);
+                connection.Open();
+                var rows = command.ExecuteNonQuery();
+                return rows > 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new DataException("Kon vacature niet bijwerken.", ex);
         }
     }
 }

@@ -44,30 +44,32 @@
                 @foreach (var vacature in Model.Vacatures)
                 {
                     string activeClass = (Model.GeselecteerdeVacature != null && vacature.Id == Model.GeselecteerdeVacature.Id) ? "active" : "";
-                    
-                    <a href="@Url.Action("Index", "Home", new { id = vacature.Id, zoekterm = Model.Zoekterm, pagina = Model.HuidigePagina })" 
-                       class="list-group-item list-group-item-action @activeClass">
-                       <div class="d-flex w-100 justify-content-between">
-                           <h5 class="mb-1">@vacature.Titel</h5>
-                           <small class="text-muted">
-                               <i class="bi bi-bookmark"></i>
-                           </small>
-                       </div>
-                       <p class="mb-1">
-                           @vacature.BedrijfNaam &bull; @vacature.Locatie
-                           @if (!string.IsNullOrEmpty(vacature.Opleidingen))
-                           {
-                               <span> &bull; @vacature.Opleidingen</span>
-                           }
-                           @if (!string.IsNullOrEmpty(vacature.Studierichtingen))
-                           {
-                               <span> &bull; @vacature.Studierichtingen</span>
-                           }
-                       </p>
-                       <small class="text-muted">
-                           Gepubliceerd op @vacature.PublicatieDatum.ToString("d MMM yyyy")
-                       </small>
-                    </a>
+
+                    <div class="list-group-item list-group-item-action position-relative @activeClass">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@vacature.Titel</h5>
+                            <small class="text-muted">
+                                <i class="bi bi-bookmark"></i>
+                            </small>
+                        </div>
+                        <p class="mb-1">
+                            <a asp-controller="Bedrijf" asp-action="Details" asp-route-id="@vacature.BedrijfId">@vacature.BedrijfNaam</a> &bull; @vacature.Locatie
+                            <span class="mx-2">&bull;</span>
+                            <span class="badge bg-light text-dark">★ @vacature.AverageRating</span>
+                            @if (!string.IsNullOrEmpty(vacature.Opleidingen))
+                            {
+                                <span> &bull; @vacature.Opleidingen</span>
+                            }
+                            @if (!string.IsNullOrEmpty(vacature.Studierichtingen))
+                            {
+                                <span> &bull; @vacature.Studierichtingen</span>
+                            }
+                        </p>
+                        <small class="text-muted">
+                            Gepubliceerd op @vacature.PublicatieDatum.ToString("d MMM yyyy")
+                        </small>
+                        <a class="stretched-link" href="@Url.Action("Index", "Home", new { id = vacature.Id, zoekterm = Model.Zoekterm, pagina = Model.HuidigePagina })"></a>
+                    </div>
                 }
             </div>
             
@@ -125,7 +127,7 @@
                         <h2 class="card-title">@Model.GeselecteerdeVacature.Titel</h2>
                         
                         <div class="d-flex align-items-center text-muted mb-3 flex-wrap">
-                            <span>@Model.GeselecteerdeVacature.BedrijfNaam</span>
+                            <a asp-controller="Bedrijf" asp-action="Details" asp-route-id="@Model.GeselecteerdeVacature.BedrijfId">@Model.GeselecteerdeVacature.BedrijfNaam</a>
                             <span class="mx-2">&bull;</span>
                             <span>@Model.GeselecteerdeVacature.Locatie</span>
                             <span class="mx-2">&bull;</span>

@@ -1,0 +1,51 @@
+@{
+    var bedrijf = (StageSpotter.Data.DTOs.BedrijfDto)ViewData["Company"];
+    var reviews = (IEnumerable<StageSpotter.Domain.Models.Review>)ViewData["Reviews"];
+    var avg = (double)ViewData["AverageRating"];
+}
+
+<h2>@bedrijf.Naam</h2>
+<p>Gemiddelde beoordeling: @String.Format("{0:0.0}", avg) / 5</p>
+
+<div class="mb-4">
+    <h5>Laat een review achter</h5>
+    <form method="post" action="/Bedrijf/AddReview">
+        <input type="hidden" name="bedrijfId" value="@bedrijf.Id" />
+        <div class="mb-2">
+            <input class="form-control" name="title" placeholder="Korte titel" required />
+        </div>
+        <div class="mb-2">
+            <textarea class="form-control" name="description" rows="3" placeholder="Beschrijving (optioneel)"></textarea>
+        </div>
+        <div class="mb-2">
+            <label>Rating</label>
+            <select name="rating" class="form-select" required>
+                <option value="5">5 - Uitstekend</option>
+                <option value="4">4 - Goed</option>
+                <option value="3">3 - Neutraal</option>
+                <option value="2">2 - Slecht</option>
+                <option value="1">1 - Erg slecht</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Plaats review</button>
+    </form>
+</div>
+
+<h4>Reviews</h4>
+@if (reviews != null && reviews.Any())
+{
+    foreach (var r in reviews)
+    {
+        <div class="card mb-2">
+            <div class="card-body">
+                <h6>@r.Title <small class="text-muted">(@r.Rating/5)</small></h6>
+                <p class="mb-0">@r.Description</p>
+                <div class="text-muted small">@r.CreatedAt</div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p class="text-muted">Nog geen reviews.</p>
+}

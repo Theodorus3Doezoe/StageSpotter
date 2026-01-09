@@ -2,6 +2,7 @@ namespace StageSpotter.Data.DTOs;
 
 public class VacatureToRepositoryDto
 {
+    public int Id { get; set; }
     public string Titel { get; set; }
     public string Beschrijving { get; set; }
     public string Locatie { get; set; }

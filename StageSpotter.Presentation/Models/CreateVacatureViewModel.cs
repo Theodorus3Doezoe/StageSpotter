@@ -25,6 +25,9 @@ public class CreateVacatureViewModel
     [Required(ErrorMessage = "Selecteer minimaal één studierichting")]
     public List<int> StudierichtingIds { get; set; } = new();
 
+    [Url(ErrorMessage = "VacatureUrl moet een geldige URL zijn")]
+    public string? VacatureUrl { get; set; }
+
     public SelectList? OpleidingsniveausList { get; set; }
     public SelectList? StudierichtingenList { get; set; }
 }
